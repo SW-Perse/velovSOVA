@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: velov-db
+    restart: always
+    environment:
+      POSTGRES_USER: velov_user
+      POSTGRES_PASSWORD: velov_password
+      POSTGRES_DB: velov_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velov_user -d velov_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: velov-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://velov_user:velov_password@db:5432/velov_db
+    volumes:
+      - ./models:/app/models # # Make the model artifact available to the API at runtime
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+
+# Launch docker compose :
+# docker compose up -d --build
+# In bash, to avoid automatic path conversion to Windows format, use the following command:
+# MSYS_NO_PATHCONV=1 docker compose up -d --build
+# Stop docker compose :
+# docker compose down
