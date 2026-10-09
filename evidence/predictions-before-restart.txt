@@ -1,0 +1,4 @@
+ id | station_id | predicted_bikes | model_version | created_at 
+----+------------+-----------------+---------------+------------
+(0 rows)
+

@@ -20,6 +20,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 import pandas as pd
+import psycopg2
 
 import joblib
 from fastapi import FastAPI, HTTPException
@@ -32,6 +33,37 @@ logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")
 
 STATE: dict = {"model": None, "metadata": None}
+
+def save_prediction(
+    station_id: int,
+    target_timestamp,
+    predicted_bikes: float,
+    model_version: str,
+) -> None:
+    """Inserts the generated prediction into the PostgreSQL predictions table."""
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        logger.warning("DATABASE_URL not found, skipping DB insert.")
+        return
+
+    try:
+        with psycopg2.connect(db_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO predictions (station_id, target_timestamp, predicted_bikes, model_version)
+                    VALUES (%s, %s, %s, %s);
+                    """,
+                    (
+                        station_id,
+                        target_timestamp.isoformat(),
+                        predicted_bikes,
+                        model_version,
+                    ),
+                )
+                conn.commit()
+    except Exception:
+        logger.exception("Failed to store prediction in database.")
 
 
 def load_model(model_dir: Path) -> tuple[object, dict]:
@@ -114,6 +146,17 @@ def predict(request: PredictionRequest) -> PredictionResponse:
 
     # Calculer le timestamp de la cible (timestamp + 1 heure)
     target_timestamp = request.timestamp + pd.Timedelta(hours=1)
+
+    # Récupérer la version du modèle depuis l'état global
+    model_version = STATE["metadata"]["model_version"]
+
+    # Sauvegarder la prédiction dans la base de données PostgreSQL
+    save_prediction(
+        station_id=request.station_id,
+        target_timestamp=target_timestamp,
+        predicted_bikes=prediction_bounded,
+        model_version=model_version,
+    )
 
     # Renvoyer la réponse sous forme de PredictionResponse
     return PredictionResponse(
