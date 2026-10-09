@@ -23,9 +23,14 @@ from pathlib import Path
 import joblib
 from fastapi import FastAPI
 
-from velov.api.schemas import PredictionRequest, PredictionResponse  # noqa: F401
+from velov.api.schemas import PredictionRequest, PredictionResponse, BatchPredictionRequest, BatchPredictionResponse  # noqa: F401
 from velov.features import FEATURES, add_features  # noqa: F401
 from velov.train import METADATA_FILENAME, sha256_of
+
+# TODO 7
+from datetime import timedelta
+import pandas as pd
+from fastapi import FastAPI, HTTPException
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")
@@ -62,10 +67,19 @@ app = FastAPI(title="Vélo'v availability API", version="1.0.0", lifespan=lifesp
 
 
 # TODO 5 [Should] : GET /health -> {"status": "ok"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 # TODO 6 [Should] : GET /ready -> 200 + version du modèle si chargé, sinon HTTPException 503
-
+@app.get("/ready")
+def ready():
+    if STATE["model"] is not None:
+        return {"model_version": STATE["metadata"]["model_version"]}
+    else:
+        raise HTTPException(status_code=503, detail="Modèle non chargé")
+        
 
 # TODO 7 [Must] : POST /v1/predict
 #   - entrée : PredictionRequest ; sortie : PredictionResponse
@@ -74,3 +88,53 @@ app = FastAPI(title="Vélo'v availability API", version="1.0.0", lifespan=lifesp
 #     (l'instant porte son fuseau : le contrat l'a validé)
 #   - 503 si le modèle n'est pas chargé
 #   Question : pourquoi importer add_features plutôt que recalculer les features ici ?
+
+@app.post("/v1/predict", response_model=PredictionResponse)
+def predict(payload: PredictionRequest):
+    if STATE["model"] is None:
+        raise HTTPException(status_code=503, detail="Modèle non chargé")
+    
+    raw = pd.DataFrame([payload.model_dump()])
+    X = add_features(raw)[FEATURES]
+    y = min(max(STATE["model"].predict(X)[0], 0), payload.capacity)
+    return PredictionResponse(
+        station_id=payload.station_id,
+        target_timestamp=payload.timestamp + timedelta(hours=1),
+        predicted_bikes=float(round(y,2)),
+        model_version=STATE["metadata"]["model_version"],
+    )
+# tp1 p5 STRETCH
+@app.post("/v1/predict/batch", response_model=BatchPredictionResponse)
+def predict_batch(payload: BatchPredictionRequest):
+    if STATE["model"] is None:
+        raise HTTPException(status_code=503, detail="Modèle non chargé")
+    
+    raw = pd.DataFrame([item.model_dump() for item in payload.items])
+    X = add_features(raw)[FEATURES]
+    ys = STATE["model"].predict(X)
+
+    predictions = []
+
+    for item, y in zip(payload.items, ys):
+        y = min(max(y, 0), item.capacity)
+
+        predictions.append(
+            PredictionResponse(
+                station_id=item.station_id,
+                target_timestamp=item.timestamp + timedelta(hours=1),
+                predicted_bikes=float(round(y, 2)),
+                model_version=STATE["metadata"]["model_version"],
+            )
+        )
+
+    return BatchPredictionResponse(predictions=predictions)
+
+# tp1 p5 STRETCH
+@app.get("/v1/model")
+def model():
+    if STATE["model"] is None:
+        raise HTTPException(status_code=503, detail="Modèle non chargé")
+    else:
+        return {"model_version": STATE["metadata"]["model_version"]}
+
+    

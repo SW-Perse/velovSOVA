@@ -11,6 +11,9 @@ TODO 9 [Should] : en ajouter d'autres, par exemple :
 
 from datetime import UTC, datetime
 
+from fastapi.testclient import TestClient
+from velov.api.main import app
+
 
 def test_predict_valid(client, valid_payload):
     r = client.post("/v1/predict", json=valid_payload)
@@ -22,4 +25,23 @@ def test_predict_valid(client, valid_payload):
 
 def test_predict_rejects_bikes_above_capacity(client, valid_payload):
     r = client.post("/v1/predict", json={**valid_payload, "bikes_available": 25})
+    assert r.status_code == 422
+
+def test_health_returns_200(client):
+    r = client.get("/health")
+    assert r.status_code == 200
+    assert r.json() == {"status": "ok"}
+
+def test_ready_returns_503(tmp_path, monkeypatch):
+    monkeypatch.setenv("MODEL_DIR", str(tmp_path))
+    with TestClient(app) as c:
+        r = c.get("/ready")
+        assert r.status_code == 503
+
+def test_predict_rejects_unknown_field(client, valid_payload):
+    r = client.post("/v1/predict", json={**valid_payload, "ville": "Annecy"})
+    assert r.status_code == 422
+
+def test_predict_rejects_timestamp_without_timezone(client, valid_payload):
+    r = client.post("/v1/predict", json={**valid_payload, "timestamp": "2026-10-07T08:00:00"})
     assert r.status_code == 422
