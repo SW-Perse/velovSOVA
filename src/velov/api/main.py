@@ -32,6 +32,9 @@ from datetime import timedelta
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 
+# TP 2 p2
+from velov.api.database import init_database
+
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")
 
@@ -43,7 +46,7 @@ def load_model(model_dir: Path) -> tuple[object, dict]:
     metadata_path = model_dir / METADATA_FILENAME
     if not metadata_path.exists():
         raise FileNotFoundError(f"{metadata_path} introuvable")
-    metadata = json.loads(metadata_path.read_text())
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     model_path = model_dir / metadata["artifact"]["file"]
     if sha256_of(model_path) != metadata["artifact"]["sha256"]:
         raise RuntimeError(f"Empreinte invalide pour {model_path}")
@@ -55,6 +58,7 @@ async def lifespan(app: FastAPI):
     """Fourni : exécuté une fois au démarrage (avant yield) et à l'arrêt (après yield)."""
     model_dir = Path(os.getenv("MODEL_DIR", "models"))
     try:
+        init_database()
         STATE["model"], STATE["metadata"] = load_model(model_dir)
         logger.info("Modèle %s chargé", STATE["metadata"]["model_version"])
     except Exception:
