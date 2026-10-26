@@ -1,0 +1,3 @@
+Repository tag: velov-mlops-student-api:0.1.0-e2812a7
+Image ID: sha256:399441a91e4335efe049a86976d27632f48feeaa2cabdb7cdf598982020feb95
+Created: 2026-10-26T10:23:02.783754871Z
