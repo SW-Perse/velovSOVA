@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: stg_station_information
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+          - unique
+      - name: capacity
+        tests:
+          - not_null
+
+  - name: stg_station_status
+    columns:
+      - name: station_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_station_information')
+                field: station_id
+      - name: reported_at
+        tests:
+          - not_null
+      - name: bikes_available
+        tests:
+          - not_null
+
+  - name: stg_weather
+    columns:
+      - name: hour_ts
+        tests:
+          - not_null
+          - unique
+
+  - name: station_hourly
+    # Politique actuelle : toute violation de capacité bloque la publication.
+    # Les diapositives du TP3 mentionnent des seuils warn_if/error_if ; revoir
+    # cette politique avec le responsable métier avant de la modifier, car
+    # EX-12 interdit de publier une table gold invalide.
+    config:
+      contract:
+        enforced: true
+    tests:
+      - unique:
+          column_name: "station_id || '-' || cast(timestamp as varchar)"
+    columns:
+      - name: station_id
+        data_type: integer
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_station_information')
+                field: station_id
+      - name: timestamp
+        data_type: timestamptz
+        tests:
+          - not_null
+      - name: capacity
+        data_type: integer
+        tests:
+          - not_null
+      - name: bikes_available
+        data_type: integer
+        tests:
+          - not_null
+      - name: temperature
+        data_type: double
+        tests:
+          - not_null
+      - name: is_raining
+        data_type: boolean
+        tests:
+          - not_null

@@ -1,0 +1,17 @@
+Command: .venv\Scripts\python.exe -m pytest tests/test_ingestion.py -s -vv
+
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\sophi\Desktop\Ynov\M2\Industrialisation de l'IA dans le Cloud\velov-mlops-student\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\sophi\Desktop\Ynov\M2\Industrialisation de l'IA dans le Cloud\velov-mlops-student
+configfile: pyproject.toml
+plugins: anyio-4.15.1, typeguard-4.6.0
+collecting ... collected 1 item
+
+tests/test_ingestion.py::test_identical_raw_payload_is_written_once first_inserted=True
+second_inserted=False
+snapshot_files=1
+payload_preserved=True
+PASSED
+
+============================== 1 passed in 0.05s ==============================

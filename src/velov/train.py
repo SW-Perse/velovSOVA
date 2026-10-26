@@ -19,6 +19,7 @@ import platform
 from datetime import UTC, datetime
 from pathlib import Path
 
+import duckdb
 import joblib
 import numpy as np
 import pandas as pd
@@ -29,6 +30,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
+from velov.contracts import validate_station_hourly
 from velov.features import (
     CATEGORICAL_FEATURES,
     FEATURES,
@@ -70,6 +72,27 @@ def temporal_split(df: pd.DataFrame, test_days: int) -> tuple[pd.DataFrame, pd.D
     if train.empty or test.empty:
         raise ValueError("Split vide : augmenter l'historique ou réduire test_days")
     return train, test
+
+
+def load_gold_training_data(database_path: Path) -> pd.DataFrame:
+    """Read and validate the dbt gold table through a read-only DuckDB connection."""
+    if not database_path.exists():
+        raise FileNotFoundError(f"{database_path} introuvable : lancer `dbt build` d'abord")
+    connection = duckdb.connect(str(database_path), read_only=True)
+    try:
+        gold = connection.sql(
+            """
+            select station_id, timestamp, capacity, bikes_available, temperature, is_raining
+            from main.station_hourly
+            order by station_id, timestamp
+            """
+        ).df()
+    finally:
+        connection.close()
+    if gold.empty:
+        raise ValueError("La table gold station_hourly est vide")
+    gold["timestamp"] = pd.to_datetime(gold["timestamp"], utc=True)
+    return validate_station_hourly(gold)
 
 
 def train(
@@ -168,12 +191,22 @@ def log_to_mlflow(metadata: dict, out_dir: Path) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Entraîne le modèle Vélo'v v0.")
     parser.add_argument("--data", type=Path, default=Path("data/velov_history.csv"))
+    parser.add_argument("--gold-db", type=Path, help="Lire et valider main.station_hourly dans DuckDB")
     parser.add_argument("--out", type=Path, default=Path("models"))
     parser.add_argument("--version", default="0.1.0")
     parser.add_argument("--mlflow", action="store_true", help="journaliser aussi dans MLflow")
     args = parser.parse_args()
 
-    metadata = train(args.data, args.out, version=args.version)
+    if args.gold_db:
+        gold = load_gold_training_data(args.gold_db)
+        temporary_data = args.gold_db.with_name("gold-training-data.csv")
+        gold.to_csv(temporary_data, index=False)
+        try:
+            metadata = train(temporary_data, args.out, version=args.version)
+        finally:
+            temporary_data.unlink(missing_ok=True)
+    else:
+        metadata = train(args.data, args.out, version=args.version)
     m = metadata["metrics"]
     print(f"MAE modèle   : {m['mae_model']:.3f} vélos")
     print(f"MAE baseline : {m['mae_baseline_persistence']:.3f} vélos (persistance)")
