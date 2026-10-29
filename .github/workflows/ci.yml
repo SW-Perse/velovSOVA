@@ -47,4 +47,4 @@ jobs:
           fetch-depth: 0
 
       - name: Rechercher les secrets avec Gitleaks
-        uses: gitleaks/gitleaks-action@d5c31ac2ad8b1544a2c1894127dbdeb61c9ec42d
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
