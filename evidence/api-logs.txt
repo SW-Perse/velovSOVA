@@ -1,0 +1,44 @@
+velov-api  | INFO:     Started server process [1]
+velov-api  | INFO:     Waiting for application startup.
+velov-api  | INFO:velov.api:Modèle 0.1.0 chargé
+velov-api  | INFO:     Application startup complete.
+velov-api  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+velov-api  | INFO:     127.0.0.1:39290 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:55238 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     172.18.0.1:48476 - "POST /v1/predict HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:49924 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:49884 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:45918 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:49124 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:50196 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:35860 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:51660 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:56170 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:57786 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:41352 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:47736 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:55006 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:40588 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:37850 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:34160 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:32830 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:56898 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:45218 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:49498 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:33854 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:34116 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:44670 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:54248 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:57618 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:33280 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:47828 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:59786 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:60346 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:59210 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:40306 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:44326 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:52930 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:37166 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:55014 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     172.18.0.1:33628 - "GET /ready HTTP/1.1" 200 OK
+velov-api  | INFO:     127.0.0.1:50574 - "GET /ready HTTP/1.1" 200 OK

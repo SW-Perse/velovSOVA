@@ -1,0 +1,19 @@
+.git
+.venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.ruff_cache
+
+mlruns
+mlflow.db
+
+tests
+docs
+exercices
+data
+.env
+.env.*
+
+# Model artifacts are supplied by the deployment pipeline at runtime.
+models

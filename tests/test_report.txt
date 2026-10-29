@@ -1,0 +1,11 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.7, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\sophi\Desktop\Ynov\M2\Industrialisation de l'IA dans le Cloud\velov-mlops-student
+configfile: pyproject.toml
+plugins: anyio-4.15.1
+collected 8 items
+
+tests\test_api.py ..                                                     [ 25%]
+tests\test_features.py ......                                            [100%]
+
+============================== 8 passed in 2.25s ==============================

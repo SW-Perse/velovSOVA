@@ -14,3 +14,8 @@ mlruns/
 
 # Secrets
 .env
+
+velov_dbt/target/
+velov_dbt/logs/
+
+velov_dbt/.user.yml

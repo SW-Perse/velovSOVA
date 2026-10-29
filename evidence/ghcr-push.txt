@@ -1,0 +1,30 @@
+The push refers to repository [ghcr.io/sw-perse/velov-mlops-student-api]
+b53fcbb5a04f: Preparing
+5da1179eed95: Preparing
+a48d43b75d41: Preparing
+09bb36f6bf1e: Preparing
+6547b34d09f3: Preparing
+ff9cfd1639f9: Preparing
+9ef9ec1762eb: Preparing
+d175833b7147: Preparing
+acbf34fa608c: Preparing
+285510654d1d: Preparing
+15f1c8eb1ab1: Preparing
+ff9cfd1639f9: Waiting
+9ef9ec1762eb: Waiting
+d175833b7147: Waiting
+acbf34fa608c: Waiting
+285510654d1d: Waiting
+15f1c8eb1ab1: Waiting
+a48d43b75d41: Pushed
+5da1179eed95: Pushed
+b53fcbb5a04f: Pushed
+09bb36f6bf1e: Pushed
+d175833b7147: Pushed
+ff9cfd1639f9: Pushed
+9ef9ec1762eb: Pushed
+acbf34fa608c: Pushed
+285510654d1d: Pushed
+6547b34d09f3: Pushed
+15f1c8eb1ab1: Pushed
+0.1.0-e2812a7: digest: sha256:51ef46c91c91368dbdaf2158f34a602a776fe971c44481909eaa32d414c14c1f size: 2615

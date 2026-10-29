@@ -1,0 +1,35 @@
+# Pinned base image
+FROM python:3.13-slim@sha256:8fb4cfa1a2616d7b8e0c2175cc6ad68f5729c34ea8488c0b360d2934b7be9024
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    MODEL_DIR=/app/models
+
+WORKDIR /app
+
+# Create dedicated non-privileged user
+RUN adduser --disabled-password --gecos "" appuser
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install project package and copy application code
+COPY pyproject.toml .
+COPY src ./src
+RUN pip install --no-cache-dir --no-deps .
+
+# Pre-create model directory and pre-warm application imports
+RUN mkdir -p /app/models && \
+    python -c "import velov; import velov.api.main"
+
+# Switch to non-root user
+USER appuser
+
+EXPOSE 8000
+
+# Health check endpoint
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')" || exit 1
+
+CMD ["uvicorn", "velov.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

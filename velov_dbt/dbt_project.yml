@@ -1,0 +1,15 @@
+name: velov
+version: 1.0.0
+config-version: 2
+
+profile: velov
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  velov:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

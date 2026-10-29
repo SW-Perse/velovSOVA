@@ -1,0 +1,62 @@
+velov-db  | The files belonging to this database system will be owned by user "postgres".
+velov-db  | This user must also own the server process.
+velov-db  | 
+velov-db  | The database cluster will be initialized with locale "en_US.utf8".
+velov-db  | The default database encoding has accordingly been set to "UTF8".
+velov-db  | The default text search configuration will be set to "english".
+velov-db  | 
+velov-db  | Data page checksums are disabled.
+velov-db  | 
+velov-db  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+velov-db  | creating subdirectories ... ok
+velov-db  | selecting dynamic shared memory implementation ... posix
+velov-db  | selecting default max_connections ... 100
+velov-db  | selecting default shared_buffers ... 128MB
+velov-db  | selecting default time zone ... UTC
+velov-db  | creating configuration files ... ok
+velov-db  | running bootstrap script ... ok
+velov-db  | sh: locale: not found
+velov-db  | 2026-10-09 13:58:28.976 UTC [35] WARNING:  no usable system locales were found
+velov-db  | performing post-bootstrap initialization ... ok
+velov-db  | initdb: warning: enabling "trust" authentication for local connections
+velov-db  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+velov-db  | syncing data to disk ... ok
+velov-db  | 
+velov-db  | 
+velov-db  | Success. You can now start the database server using:
+velov-db  | 
+velov-db  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+velov-db  | 
+velov-db  | waiting for server to start....2026-10-09 13:58:29.740 UTC [41] LOG:  starting PostgreSQL 15.19 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+velov-db  | 2026-10-09 13:58:29.743 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+velov-db  | 2026-10-09 13:58:29.750 UTC [44] LOG:  database system was shut down at 2026-10-09 13:58:29 UTC
+velov-db  | 2026-10-09 13:58:29.756 UTC [41] LOG:  database system is ready to accept connections
+velov-db  |  done
+velov-db  | server started
+velov-db  | CREATE DATABASE
+velov-db  | 
+velov-db  | 
+velov-db  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/init.sql
+velov-db  | CREATE TABLE
+velov-db  | 
+velov-db  | 
+velov-db  | waiting for server to shut down....2026-10-09 13:58:29.933 UTC [41] LOG:  received fast shutdown request
+velov-db  | 2026-10-09 13:58:29.935 UTC [41] LOG:  aborting any active transactions
+velov-db  | 2026-10-09 13:58:29.937 UTC [41] LOG:  background worker "logical replication launcher" (PID 47) exited with exit code 1
+velov-db  | 2026-10-09 13:58:29.937 UTC [42] LOG:  shutting down
+velov-db  | 2026-10-09 13:58:29.939 UTC [42] LOG:  checkpoint starting: shutdown immediate
+velov-db  | 2026-10-09 13:58:30.022 UTC [42] LOG:  checkpoint complete: wrote 929 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.024 s, sync=0.053 s, total=0.085 s; sync files=304, longest=0.003 s, average=0.001 s; distance=4265 kB, estimate=4265 kB
+velov-db  | 2026-10-09 13:58:30.032 UTC [41] LOG:  database system is shut down
+velov-db  |  done
+velov-db  | server stopped
+velov-db  | 
+velov-db  | PostgreSQL init process complete; ready for start up.
+velov-db  | 
+velov-db  | 2026-10-09 13:58:30.064 UTC [1] LOG:  starting PostgreSQL 15.19 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+velov-db  | 2026-10-09 13:58:30.064 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+velov-db  | 2026-10-09 13:58:30.064 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+velov-db  | 2026-10-09 13:58:30.069 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+velov-db  | 2026-10-09 13:58:30.077 UTC [59] LOG:  database system was shut down at 2026-10-09 13:58:30 UTC
+velov-db  | 2026-10-09 13:58:30.086 UTC [1] LOG:  database system is ready to accept connections
+velov-db  | 2026-10-09 14:03:30.076 UTC [57] LOG:  checkpoint starting: time
+velov-db  | 2026-10-09 14:03:34.825 UTC [57] LOG:  checkpoint complete: wrote 50 buffers (0.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=4.736 s, sync=0.005 s, total=4.749 s; sync files=16, longest=0.003 s, average=0.001 s; distance=268 kB, estimate=268 kB

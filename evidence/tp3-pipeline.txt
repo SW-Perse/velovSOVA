@@ -1,0 +1,9 @@
+TP3 build and reproducibility evidence
+
+First dbt build: PASS=23 WARN=0 ERROR=0 SKIP=0
+First station_hourly deterministic SHA-256: 56c0714a3c8ec543ce23a2b7d79829c1f8c534a2d689d4dabe6ba41009a64074
+Second dbt build: PASS=23 WARN=0 ERROR=0 SKIP=0
+Second station_hourly deterministic SHA-256: 56c0714a3c8ec543ce23a2b7d79829c1f8c534a2d689d4dabe6ba41009a64074
+EX-10: PASS - hashes identical after replay.
+EX-11: PASS - no_temporal_leakage returned zero rows.
+EX-12: PASS - enforced gold contract and bikes_within_capacity passed; invalid gold is blocked by dbt build.
