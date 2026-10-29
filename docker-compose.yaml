@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: velov-db
+    restart: always
+    environment:
+      PGUSER: velov_user
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant, voir .env.example}
+      PGDATABASE: velov_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U velov_user -d velov_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: velov-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://velov_user:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant, voir .env.example}@db:5432/velov_db
+    volumes:
+      - ./models:/app/models # # Make the model artifact available to the API at runtime
+    depends_on:
+      db:
+        condition: service_healthy
+
+  mlflow-db-init:
+    image: postgres:17-alpine
+    environment:
+      PGHOST: db
+      PGDATABASE: velov_db
+      PGUSER: velov_user
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant, voir .env.example}
+    command:
+      - sh
+      - -c
+      - >
+        psql -tAc "SELECT 1 FROM pg_database WHERE datname = 'mlflow'" | grep -q 1
+        || psql -c "CREATE DATABASE mlflow"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  mlflow:
+    build:
+      context: docker
+      dockerfile: mlflow.Dockerfile
+    image: velov-mlflow:3.16.1
+    environment:
+      # Métadonnées (runs, registre) dans la base "mlflow" du service db ;
+      # fichiers (modèles) sur un volume, servis par le serveur.
+      MLFLOW_BACKEND_STORE_URI: postgresql+psycopg://velov_user:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant, voir .env.example}@db:5432/mlflow
+    # Depuis MLflow 3.5, le serveur refuse les en-têtes Host inconnus (protection DNS rebinding).
+    # La liste remplace les valeurs par défaut : on y met tout ce qui doit joindre le serveur,
+    # port compris. 192.168.1.* : le réseau des VM de l'école.
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000 --workers 2
+      --artifacts-destination /mlartifacts
+      --allowed-hosts mlflow:5000,localhost:5000,127.0.0.1:5000,192.168.1.*
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlartifacts:/mlartifacts
+    depends_on:
+      mlflow-db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mlartifacts:
+
+# Launch docker compose :
+# docker compose up -d --build
+# In bash, to avoid automatic path conversion to Windows format, use the following command:
+# MSYS_NO_PATHCONV=1 docker compose up -d --build
+# Stop docker compose :
+# docker compose down

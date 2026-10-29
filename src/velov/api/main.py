@@ -28,18 +28,8 @@ from fastapi import FastAPI, HTTPException
 from velov.api.schemas import PredictionRequest, PredictionResponse  # noqa: F401
 from velov.features import FEATURES, add_features  # noqa: F401
 from velov.train import METADATA_FILENAME, sha256_of
-
-<<<<<<< HEAD
-# TODO 7
-from datetime import timedelta
-import pandas as pd
-from fastapi import FastAPI, HTTPException
-
-# TP 2 p2
 from velov.api.database import init_database
 
-=======
->>>>>>> origin/tp3
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")
 
