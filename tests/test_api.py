@@ -10,8 +10,10 @@ TODO 9 [Should] : en ajouter d'autres, par exemple :
 """
 
 from datetime import UTC, datetime
+
 from fastapi.testclient import TestClient
-from velov.api.main import STATE, app
+
+from velov.api.main import app
 
 
 def test_predict_valid(client, valid_payload):

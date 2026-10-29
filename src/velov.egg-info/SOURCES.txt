@@ -1,8 +1,13 @@
 README.md
 pyproject.toml
 src/velov/__init__.py
+src/velov/artifacts.py
+src/velov/build_training_data.py
+src/velov/contracts.py
 src/velov/data.py
 src/velov/features.py
+src/velov/ingest.py
+src/velov/run_microbatch.py
 src/velov/train.py
 src/velov.egg-info/PKG-INFO
 src/velov.egg-info/SOURCES.txt
@@ -12,4 +17,6 @@ src/velov/api/__init__.py
 src/velov/api/main.py
 src/velov/api/schemas.py
 tests/test_api.py
+tests/test_contract.py
 tests/test_features.py
+tests/test_ingestion.py

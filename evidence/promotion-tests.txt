@@ -1,0 +1,25 @@
+MUST 3 promotion verification
+
+Command:
+python -m pytest tests/test_promotion.py tests/test_training_metadata.py -q
+
+Result:
+14 passed
+
+Promotion decision cases:
+- challenger beats persistence and champion by 2%: PASS
+- challenger does not beat persistence: PASS
+- challenger does not beat champion by 2%: PASS
+- evaluation windows differ: PASS
+- no existing champion is accepted as first champion: PASS
+- exact 2% boundary uses <= and is promoted: PASS
+
+MLflow registry/CLI cases:
+- challenger alias points to the registered version: PASS
+- --apply moves champion to the challenger: PASS
+- default command leaves aliases unchanged: PASS
+- promotion audit tags are recorded on the challenger run: PASS
+
+Lint:
+ruff check src/velov/promote.py tests/test_promotion.py
+All checks passed

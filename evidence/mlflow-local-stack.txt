@@ -1,0 +1,15 @@
+MLflow local stack verification
+MLflow URL: http://localhost:5000
+Secret configuration: PASS
+Compose interpolation: PASS
+NAME           IMAGE                            COMMAND                  SERVICE   CREATED       STATUS                 PORTS
+velov-api      velov-mlops-student-api          "uvicorn velov.api.mâ€¦"   api       2 hours ago   Up 2 hours (healthy)   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+velov-db       postgres:15-alpine               "docker-entrypoint.sâ€¦"   db        3 days ago    Up 4 hours (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+velov-mlflow   velov-mlflow:3.16.1-postgresql   "mlflow server --hosâ€¦"   mlflow    2 hours ago   Up 2 minutes           0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+Container and initialization status: PASS
+MLflow HTTP endpoints: PASS
+PostgreSQL and MLflow database: PASS
+Metadata counts before restart: 2|7|1|6
+Metadata counts after restart: 2|7|1|6
+MLflow restart persistence: PASS
+OVERALL: PASS

@@ -1,0 +1,28 @@
+MUST 3 end-to-end MLflow verification
+
+Scenario 1: seed 42 registered as challenger and applied as first champion
+  registered model: velov-availability
+  champion alias after --apply: version 5
+  decision: PROMOTE (first champion)
+
+Scenario 2: seed 7 registered as challenger and evaluated
+  challenger alias: version 6
+  champion alias: version 5
+  same evaluation window: PASS
+  beats persistence: PASS
+  beats champion by 2%: FAIL
+  final decision: REJECT
+  challenger MAE: 1.345
+  champion MAE: 1.339
+  required challenger threshold: 1.312
+
+Alias safety:
+  champion unchanged after rejection: PASS
+  observed challenger alias: version 6
+  observed champion alias: version 5
+
+Audit tags on rejected challenger:
+  promotion_decision: rejected
+  promotion_reason: MAE 1.345 > 1.312 (champion - 2%)
+  promotion_previous_champion: 5
+  promotion_rule_version: 1

@@ -19,15 +19,15 @@ import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-import pandas as pd
-import psycopg2
 
 import joblib
+import pandas as pd
+import psycopg2
 from fastapi import FastAPI, HTTPException
 
 from velov.api.schemas import PredictionRequest, PredictionResponse  # noqa: F401
+from velov.artifacts import METADATA_FILENAME, sha256_of
 from velov.features import FEATURES, add_features  # noqa: F401
-from velov.train import METADATA_FILENAME, sha256_of
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")

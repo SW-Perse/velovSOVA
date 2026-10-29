@@ -5,8 +5,9 @@ TP1, partie 2 : complétez les schémas. Mode : SANS IA pour cette partie.
 
 from __future__ import annotations
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator, model_validator
 from datetime import UTC
+
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class PredictionRequest(BaseModel):
@@ -46,7 +47,9 @@ class PredictionRequest(BaseModel):
     @model_validator(mode="after")
     def check_bikes_available_le_capacity(self):
         if self.bikes_available > self.capacity:
-            raise ValueError(f"bikes_available {self.bikes_available} ne peut pas être supérieur à capacity {self.capacity}")
+            raise ValueError(
+                f"bikes_available {self.bikes_available} ne peut pas être supérieur à capacity {self.capacity}"
+            )
         return self
 
     # Normaliser timestamp en UTC

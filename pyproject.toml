@@ -15,6 +15,9 @@ where = ["src"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 addopts = "-q"
+markers = [
+    "integration: requires the local Docker Compose stack",
+]
 
 [tool.ruff]
 line-length = 120
@@ -26,3 +29,4 @@ ignore = ["S101"]  # assert autorisé dans les tests
 
 [tool.ruff.lint.per-file-ignores]
 "exercices/**" = ["S"]
+"tests/test_mlflow_stack.py" = ["S310", "S603", "S607"]
