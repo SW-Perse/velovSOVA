@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - tp4
+      - tp5
       - main
       - master
   pull_request:
