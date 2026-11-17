@@ -104,6 +104,70 @@ docker compose ps api
 docker compose down
 ```
 
+### Mesure du goulot par etape
+
+Le temps total de traitement est expose par l'en-tete `X-Process-Time-Ms`. Une
+verification HTTP peut etre faite avec :
+
+```powershell
+curl.exe -i -X POST http://127.0.0.1:8000/v1/predict `
+  -H "Content-Type: application/json" `
+  -d '{"station_id":3,"timestamp":"2026-10-06T08:00:00+02:00","capacity":20,"bikes_available":12,"temperature":14.5,"is_raining":false}'
+```
+
+Le benchmark interne mesure les features, l'inference et le post-traitement sans
+reseau ni ecriture PostgreSQL :
+
+```powershell
+python scripts\bench_predict.py --batch 1 100 1000 --runs 30 |
+  Tee-Object -FilePath evidence\tp5-bench-predict.txt
+```
+
+Les mesures internes de reference sont conservees dans
+[`tp5-bench-predict.txt`](evidence/tp5-bench-predict.txt) :
+
+| Etape mesuree | Batch | p50 (ms) | p95 (ms) |
+|---|---:|---:|---:|
+| `add_features` | 1 | 3,959 | 4,610 |
+| `model.predict` | 1 | 5,011 | 5,891 |
+| Post-traitement | 1 | 0,054 | 0,068 |
+| Total `_predict()` | 1 | 9,055 | 10,302 |
+| `add_features` | 100 | 5,286 | 6,007 |
+| `model.predict` | 100 | 6,035 | 7,241 |
+| Post-traitement | 100 | 1,040 | 1,502 |
+| Total `_predict()` | 100 | 12,451 | 13,978 |
+| `add_features` | 1000 | 10,403 | 12,824 |
+| `model.predict` | 1000 | 7,083 | 7,963 |
+| Post-traitement | 1000 | 8,194 | 9,971 |
+| Total `_predict()` | 1000 | 26,053 | 29,868 |
+
+Le temps API est mesure par `X-Process-Time-Ms`, qui couvre `_predict()` et
+l'ecriture PostgreSQL. Les 30 valeurs brutes sont conservees dans
+[`tp5-api-timings-ms.txt`](evidence/tp5-api-timings-ms.txt) :
+
+| Mesure | Nombre de requetes | p50 (ms) | p95 (ms) | Source |
+|---|---:|---:|---:|---|
+| Temps interne `model.predict`, batch 1 | 30 runs | 5,011 | 5,891 | `tp5-bench-predict.txt` |
+| Temps interne `model.predict`, batch 100 | 30 runs | 6,035 | 7,241 | `tp5-bench-predict.txt` |
+| Temps interne `model.predict`, batch 1000 | 30 runs | 7,083 | 7,963 | `tp5-bench-predict.txt` |
+| Temps API `X-Process-Time-Ms` | 30 requetes | 12,702 | 14,375 | `tp5-api-timings-ms.txt` |
+| Latence Locust a 10 usagers | campagne de charge | 61 | 75 | `saturation-summary.md` |
+
+L'ecart observe entre le p50 Locust a 10 usagers et le p50
+`X-Process-Time-Ms` est de **48,298 ms** (61 - 12,702 ms). Cette comparaison
+met en evidence le temps ajoute par le chemin HTTP et la charge concurrente,
+mais les deux mesures doivent etre interpretees comme deux campagnes
+complementaires et non comme une decomposition exacte d'une meme requete.
+
+**Conclusion :**
+**Pour une requete unitaire**, le goulot interne est
+`model.predict` (p50 de 5,011 ms, contre 3,959 ms pour `add_features`).
+Le post-traitement est négligeable (**0,054 ms**).
+
+**Coût de l'enveloppe API et base de données :** L'écart entre le traitement interne (`9,055 ms`) et le temps mesuré par l'en-tête `X-Process-Time-Ms` (`12,702 ms`) montre que la validation et l'écriture en base PostgreSQL ajoutent un surcoût faible et stable d'environ **3,65 ms** par requête.
+
+**Le traitement par lots (batching)** s'amortit très bien (seulement `26,053 ms` pour 1 000 lignes, où `add_features` devient l'étape la plus coûteuse avec `10,403 ms`). En revanche, sur des requêtes unitaires concurrentes, le cœur CPU unique de l'API sature (jusqu'à **94,16 %** à 50 usagers, tandis que Locust reste sous **15 %**). Le débit plafonne ainsi autour de **59 req/s**, provoquant une mise en file d'attente des requêtes et l'explosion de la latence. Ces mesures prouvent que le calcul API, et non le generateur de charge, limite la capacite.
+
 ### Courbe de saturation TP5
 
 La campagne complète mesure cinq paliers de charge après une minute

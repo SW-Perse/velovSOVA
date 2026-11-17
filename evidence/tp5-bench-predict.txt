@@ -1,0 +1,13 @@
+Modele: 0.1.0
+Batch 1: total p50=9.055 ms p95=10.302 ms
+  features p50=3.959 ms p95=4.610 ms
+  inference p50=5.011 ms p95=5.891 ms
+  post-traitement p50=0.054 ms p95=0.068 ms
+Batch 100: total p50=12.451 ms p95=13.978 ms
+  features p50=5.286 ms p95=6.007 ms
+  inference p50=6.035 ms p95=7.241 ms
+  post-traitement p50=1.040 ms p95=1.502 ms
+Batch 1000: total p50=26.053 ms p95=29.868 ms
+  features p50=10.403 ms p95=12.824 ms
+  inference p50=7.083 ms p95=7.963 ms
+  post-traitement p50=8.194 ms p95=9.971 ms

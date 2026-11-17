@@ -19,6 +19,7 @@ from velov.api.main import app
 def test_predict_valid(client, valid_payload):
     r = client.post("/v1/predict", json=valid_payload)
     assert r.status_code == 200
+    assert float(r.headers["X-Process-Time-Ms"]) >= 0
     # 8 h à Lyon (+02:00) + 1 h = 7 h UTC, quel que soit le fuseau dans lequel l'API répond
     target = datetime.fromisoformat(r.json()["target_timestamp"])
     assert target == datetime(2026, 10, 6, 7, tzinfo=UTC)

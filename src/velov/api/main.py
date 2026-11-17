@@ -17,13 +17,15 @@ from __future__ import annotations
 import json
 import logging
 import os
+import time
+from collections.abc import Sequence
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import joblib
 import pandas as pd
 import psycopg2
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 
 from velov.api.schemas import PredictionRequest, PredictionResponse  # noqa: F401
 from velov.artifacts import METADATA_FILENAME, sha256_of
@@ -114,57 +116,86 @@ def ready() -> dict[str, str]:
         "model_version": STATE["metadata"]["model_version"],
     }
 
-# TODO 7 [Must] : POST /v1/predict ✓
-#   - entrée : PredictionRequest ; sortie : PredictionResponse ✓
-#   - construire un DataFrame d'une ligne, appliquer add_features, sélectionner FEATURES ✓
-#   - prédire, borner entre 0 et capacity, target_timestamp = timestamp + 1 h ✓
-#     (l'instant porte son fuseau : le contrat l'a validé)
-#   - 503 si le modèle n'est pas chargé ✓
-#   Question : pourquoi importer add_features plutôt que recalculer les features ici ? ✓
-@app.post("/v1/predict", response_model=PredictionResponse)
-def predict(request: PredictionRequest) -> PredictionResponse:
-    # Verifier que le modèle est chargé
-    if STATE["model"] is None:
-        raise HTTPException(status_code=503, detail="Modèle non chargé")
-    
-    # Construire un DataFrame à partir du contenu de la requête
-    df = pd.DataFrame([request.model_dump()])
+def _predict(
+    requests: Sequence[PredictionRequest],
+    model: object,
+    model_version: str,
+) -> tuple[list[PredictionResponse], dict[str, float]]:
+    """Execute la preparation des features et l'inference sans reseau ni base."""
+    started_at = time.perf_counter()
 
-    # Utiliser la méthode de preprocessing packagée "add_features" pour extraire les features
+    features_started_at = time.perf_counter()
+    df = pd.DataFrame([request.model_dump() for request in requests])
     df_features = add_features(df)
-    # Sélectionner uniquement les colonnes de features attendues par le modèle
     X = df_features[FEATURES]
-    # Question : pourquoi importer add_features plutôt que recalculer les features ici ?
-    # Précisément pour éviter le training-serving skew : 
-    # Le code de preprocessing reste l même en train et en production, donc les features sont cohérentes.
+    features_ms = (time.perf_counter() - features_started_at) * 1000
 
-    # Calculer la prédiction
-    prediction = float(STATE["model"].predict(X)[0])
+    inference_started_at = time.perf_counter()
+    predictions = model.predict(X)
+    inference_ms = (time.perf_counter() - inference_started_at) * 1000
 
-    # Borner la prédiction entre 0 et capacity
-    prediction_bounded = max(0.0, min(prediction, float(request.capacity)))
+    postprocessing_started_at = time.perf_counter()
+    responses = []
+    for request, prediction in zip(requests, predictions, strict=True):
+        prediction_bounded = max(0.0, min(float(prediction), float(request.capacity)))
+        responses.append(
+            PredictionResponse(
+                station_id=request.station_id,
+                target_timestamp=request.timestamp + pd.Timedelta(hours=1),
+                predicted_bikes=prediction_bounded,
+                model_version=model_version,
+            )
+        )
+    postprocessing_ms = (time.perf_counter() - postprocessing_started_at) * 1000
 
-    # Calculer le timestamp de la cible (timestamp + 1 heure)
-    target_timestamp = request.timestamp + pd.Timedelta(hours=1)
+    return responses, {
+        "features_ms": features_ms,
+        "inference_ms": inference_ms,
+        "postprocessing_ms": postprocessing_ms,
+        "total_ms": (time.perf_counter() - started_at) * 1000,
+    }
 
-    # Récupérer la version du modèle depuis l'état global
-    model_version = STATE["metadata"]["model_version"]
 
-    # Sauvegarder la prédiction dans la base de données PostgreSQL
-    save_prediction(
-        station_id=request.station_id,
-        target_timestamp=target_timestamp,
-        predicted_bikes=prediction_bounded,
-        model_version=model_version,
+# TODO 7 [Must] : POST /v1/predict
+#   - entree : PredictionRequest ; sortie : PredictionResponse
+#   - construire les features, predire et borner entre 0 et capacity
+#   - target_timestamp = timestamp + 1 h
+#   - 503 si le modele n'est pas charge
+@app.post("/v1/predict", response_model=PredictionResponse)
+def predict(request: PredictionRequest, response: Response) -> PredictionResponse:
+    """Sert une prediction et expose le temps total de traitement de l'API."""
+    if STATE["model"] is None or STATE["metadata"] is None:
+        raise HTTPException(status_code=503, detail="Modele non charge")
+
+    started_at = time.perf_counter()
+    predictions, timings = _predict(
+        [request],
+        STATE["model"],
+        STATE["metadata"]["model_version"],
     )
 
-    # Renvoyer la réponse sous forme de PredictionResponse
-    return PredictionResponse(
-        station_id=request.station_id,
-        target_timestamp=target_timestamp,
-        predicted_bikes=prediction_bounded,
-        model_version=STATE["metadata"]["model_version"],
-        )
+    database_started_at = time.perf_counter()
+    prediction = predictions[0]
+    save_prediction(
+        station_id=prediction.station_id,
+        target_timestamp=prediction.target_timestamp,
+        predicted_bikes=prediction.predicted_bikes,
+        model_version=prediction.model_version,
+    )
+    database_ms = (time.perf_counter() - database_started_at) * 1000
+    total_ms = (time.perf_counter() - started_at) * 1000
 
-# IA utilisée : 
+    response.headers["X-Process-Time-Ms"] = f"{total_ms:.3f}"
+    logger.debug(
+        "Temps prediction: total=%.3f ms features=%.3f ms inference=%.3f ms "
+        "postprocessing=%.3f ms base=%.3f ms",
+        total_ms,
+        timings["features_ms"],
+        timings["inference_ms"],
+        timings["postprocessing_ms"],
+        database_ms,
+    )
+    return prediction
+
+# IA utilisée :
 # Gemini pour la gestion des codes d'erreurs (import HTTPException) et pour la correction du format output
