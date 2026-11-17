@@ -19,3 +19,9 @@ velov_dbt/target/
 velov_dbt/logs/
 
 velov_dbt/.user.yml
+
+# Résultats locaux des campagnes de mesure Locust
+locust-results/
+
+# Fichier d'instructions pour Copilot
+copilot-instructions.md

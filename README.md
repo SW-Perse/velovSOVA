@@ -37,6 +37,7 @@ pytest                               # tests
 uvicorn velov.api.main:app --reload  # API sur http://127.0.0.1:8000/docs (--reload : en dev uniquement)
 ```
 
+
 Après `docker compose up -d`, l'interface MLflow est disponible sur
 http://localhost:5000. Le service PostgreSQL conserve les prédictions de l'API
 dans `velov_db` et les métadonnées MLflow dans une base séparée `mlflow`.
@@ -65,6 +66,106 @@ Avec l'option `--mlflow`, chaque run conserve :
 - le modèle MLflow sérialisé avec sa signature ;
 - le paquet reproductible `model-package/`, contenant les fichiers locaux
   `model.joblib` et `metadata.json`.
+
+### Préparer la mesure de charge (TP5)
+
+La mesure de référence porte sur `POST /v1/predict`. Elle utilise le modèle
+chargé et le chemin complet de l'API, y compris l'écriture de la prédiction
+dans PostgreSQL lorsqu'une `DATABASE_URL` est configurée. Le scénario Locust
+est dans `locustfile.py` et réutilise toujours le même payload valide.
+
+Pour une campagne de mesure, l'API doit être lancée sans rechargement de code,
+avec un seul worker Uvicorn et une limite Docker d'un cœur. Ces réglages sont
+définis dans le service `api` de `docker-compose.yml`. Locust reste lancé sur
+la machine hôte, à côté du conteneur API, afin que la limite CPU mesure bien le
+service testé et non le générateur de charge.
+
+
+Le test court ci-dessous est un smoke test avant toute campagne plus longue :
+`/ready` doit répondre `200`, Locust doit afficher `0` requête échouée, et les
+fichiers CSV/HTML doivent être conservés localement. Pour une campagne
+reproductible, noter le commit, le modèle, le nombre d'utilisateurs, le débit
+de lancement, la durée, le nombre de workers et la limite CPU. Les résultats
+Locust donnent notamment le débit, le taux d'erreur et les percentiles p50,
+p95 et p99 de latence.
+Dans PowerShell, après avoir créé `.env` et généré le modèle :
+
+```powershell
+docker compose up -d --build
+Invoke-WebRequest http://127.0.0.1:8000/health
+Invoke-WebRequest http://127.0.0.1:8000/ready
+python -m pip install -r requirements-dev.txt
+New-Item -ItemType Directory -Force locust-results
+locust --headless --locustfile locustfile.py `
+  --host http://127.0.0.1:8000 `
+  --users 10 --spawn-rate 2 --run-time 1m `
+  --csv locust-results/tp5-smoke --html locust-results/tp5-smoke.html
+docker compose ps api
+docker compose down
+```
+
+### Courbe de saturation TP5
+
+La campagne complète mesure cinq paliers de charge après une minute
+d'échauffement : 10, 25, 50, 100 et 150 utilisateurs simultanés. Chaque
+palier dure deux minutes et produit les fichiers bruts Locust dans
+`locust-results/tp5-saturation`. Le scénario vérifie le statut HTTP et le
+contrat JSON de chaque prédiction ; une réponse invalide est donc comptée
+comme une erreur.
+
+L'API doit rester sur un worker et un cœur (`docker-compose.yml`). Locust doit
+rester sur la machine hôte. Depuis PowerShell, avec l'API prête :
+
+```powershell
+.\loadtest\paliers.ps1
+```
+
+Les paramètres peuvent être adaptés sans modifier le protocole de référence :
+
+```powershell
+.\loadtest\paliers.ps1 -HostUrl http://127.0.0.1:8000 `
+  -ResultsDirectory locust-results\tp5-saturation
+```
+
+Le rapport `saturation-summary.md` et le graphique `saturation-summary.svg`
+sont générés automatiquement. La capacité sous le SLO est le débit du
+dernier palier dont le p95 reste inférieur à 200 ms et dont le taux d'erreur
+reste inférieur à 0,1 %. Le rapport indique aussi le premier palier qui
+dépasse le SLO. Les résultats doivent être accompagnés dans le rendu du
+commit, du modèle, de la machine, des versions, de la limite CPU et de
+l'heure de mesure.
+
+#### Résultats de la mesure
+
+Campagne réalisée le 17 novembre 2026 avec un worker Uvicorn, une limite API
+d'un cœur, Locust sur la machine hôte et zéro erreur HTTP ou de contrat :
+
+| Utilisateurs | p50 (ms) | p95 (ms) | p99 (ms) | Débit (req/s) | Erreurs | SLO |
+|---:|---:|---:|---:|---:|---:|:---:|
+| 10 | 61 | 75 | 94 | 12,21 | 0,000 % | Respecté |
+| 25 | 64 | 110 | 170 | 30,31 | 0,000 % | Respecté |
+| 50 | 100 | 350 | 560 | 55,49 | 0,000 % | Dépassé |
+| 100 | 940 | 1400 | 1600 | 59,09 | 0,000 % | Dépassé |
+| 150 | 1700 | 2100 | 3000 | 59,02 | 0,000 % | Dépassé |
+
+La capacité mesurée sous le SLO est donc de **30,31 req/s au palier de
+25 utilisateurs**. Le premier dépassement apparaît à 50 utilisateurs, avec
+un p95 de 350 ms. La courbe complète est disponible dans
+[`saturation-summary.svg`](locust-results/tp5-saturation/saturation-summary.svg)
+et le tableau détaillé dans
+[`saturation-summary.md`](locust-results/tp5-saturation/saturation-summary.md).
+
+![Courbe de saturation](locust-results/tp5-saturation/saturation-summary.svg)
+
+Une campagne ciblée à 50 utilisateurs a également servi à documenter les
+ressources au moment de la saturation. Elle a mesuré un p95 de 540 ms,
+un débit de 51,32 req/s et zéro erreur. Les échantillons `docker stats`
+montrent un CPU API jusqu'à 94,16 % et environ 164 MiB de mémoire, tandis que
+le processus Python enfant de Locust est resté sous 15 % CPU. Ces mesures
+confirment que le goulot est l'API, et non le générateur de charge :
+[`tp5-api-stats-50-users.txt`](evidence/tp5-api-stats-50-users.txt),
+[`tp5-locust-stats-50-users.txt`](evidence/tp5-locust-stats-50-users.txt) et
+[`saturation-summary.md`](locust-results/tp5-saturation-50/saturation-summary.md).
 
 ### Intégration continue
 

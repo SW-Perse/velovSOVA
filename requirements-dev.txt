@@ -9,3 +9,4 @@ duckdb==1.4.1
 dbt-core==1.10.13
 dbt-duckdb==1.10.0
 pandera==0.27.0
+locust==2.43.1

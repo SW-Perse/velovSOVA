@@ -77,6 +77,8 @@ services:
     container_name: velov-api
     ports:
       - "8000:8000"
+    cpus: "1.0"
+    command: ["uvicorn", "velov.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
