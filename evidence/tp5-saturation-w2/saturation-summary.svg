@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="650" viewBox="0 0 1000 650">
+<style>text{font:14px sans-serif;fill:#263238}.title{font-size:20px;font-weight:bold}.axis{stroke:#263238;stroke-width:2}.grid{stroke:#cfd8dc;stroke-width:1}.bar{fill:#78909c}.rate{fill:none;stroke:#455a64;stroke-width:4}.latency{fill:none;stroke:#e67e22;stroke-width:4}.point{fill:#e67e22;stroke:#fff;stroke-width:2}.slo{stroke:#c0392b;stroke-width:2;stroke-dasharray:8 6}.rate-value{fill:#455a64}.latency-value{fill:#d35400}.legend{font-size:15px}</style>
+<text class="title" x="500.0" y="32" text-anchor="middle">Courbe de saturation de l'API</text>
+<line class="grid" x1="90" y1="545.0" x2="910" y2="545.0"/>
+<text class="tick left-tick" x="78" y="550.0" text-anchor="end">0</text>
+<text class="tick right-tick" x="922" y="550.0">0</text>
+<line class="grid" x1="90" y1="450.0" x2="910" y2="450.0"/>
+<text class="tick left-tick" x="78" y="455.0" text-anchor="end">12</text>
+<text class="tick right-tick" x="922" y="455.0">760</text>
+<line class="grid" x1="90" y1="355.0" x2="910" y2="355.0"/>
+<text class="tick left-tick" x="78" y="360.0" text-anchor="end">24</text>
+<text class="tick right-tick" x="922" y="360.0">1520</text>
+<line class="grid" x1="90" y1="260.0" x2="910" y2="260.0"/>
+<text class="tick left-tick" x="78" y="265.0" text-anchor="end">36</text>
+<text class="tick right-tick" x="922" y="265.0">2280</text>
+<line class="grid" x1="90" y1="165.0" x2="910" y2="165.0"/>
+<text class="tick left-tick" x="78" y="170.0" text-anchor="end">48</text>
+<text class="tick right-tick" x="922" y="170.0">3040</text>
+<line class="grid" x1="90" y1="70.0" x2="910" y2="70.0"/>
+<text class="tick left-tick" x="78" y="75.0" text-anchor="end">60</text>
+<text class="tick right-tick" x="922" y="75.0">3800</text>
+<line class="axis" x1="90" y1="70" x2="90" y2="545"/>
+<line class="axis" x1="910" y1="70" x2="910" y2="545"/>
+<line class="axis" x1="90" y1="545" x2="910" y2="545"/>
+<line class="slo" x1="90" y1="520.0" x2="910" y2="520.0"/>
+<text class="slo-label" x="906" y="512.0" text-anchor="end">SLO p95 &lt; 200 ms</text>
+<rect class="bar" x="126.1" y="447.9" width="91.8" height="97.1"/>
+<rect class="bar" x="290.1" y="305.5" width="91.8" height="239.5"/>
+<rect class="bar" x="454.1" y="151.8" width="91.8" height="393.2"/>
+<rect class="bar" x="618.1" y="152.8" width="91.8" height="392.2"/>
+<rect class="bar" x="782.1" y="157.4" width="91.8" height="387.6"/>
+<polyline class="rate" points="172.0,447.9 336.0,305.5 500.0,151.8 664.0,152.8 828.0,157.4"/>
+<polyline class="latency" points="172.0,534.9 336.0,534.0 500.0,443.8 664.0,320.0 828.0,195.0"/>
+<circle class="point" cx="172.0" cy="534.9" r="5"/>
+<circle class="point" cx="336.0" cy="534.0" r="5"/>
+<circle class="point" cx="500.0" cy="443.8" r="5"/>
+<circle class="point" cx="664.0" cy="320.0" r="5"/>
+<circle class="point" cx="828.0" cy="195.0" r="5"/>
+<text class="value rate-value" x="172.0" y="439.9" text-anchor="middle">12.27</text>
+<text class="value rate-value" x="336.0" y="297.5" text-anchor="middle">30.25</text>
+<text class="value rate-value" x="500.0" y="143.8" text-anchor="middle">49.67</text>
+<text class="value rate-value" x="664.0" y="144.8" text-anchor="middle">49.54</text>
+<text class="value rate-value" x="828.0" y="149.4" text-anchor="middle">48.95</text>
+<text class="value latency-value" x="172.0" y="522.9" text-anchor="middle">81</text>
+<text class="value latency-value" x="336.0" y="522.0" text-anchor="middle">88</text>
+<text class="value latency-value" x="500.0" y="431.8" text-anchor="middle">810</text>
+<text class="value latency-value" x="664.0" y="308.0" text-anchor="middle">1800</text>
+<text class="value latency-value" x="828.0" y="183.0" text-anchor="middle">2800</text>
+<text class="axis-label" x="172.0" y="588" text-anchor="middle">10</text>
+<text class="axis-label" x="336.0" y="588" text-anchor="middle">25</text>
+<text class="axis-label" x="500.0" y="588" text-anchor="middle">50</text>
+<text class="axis-label" x="664.0" y="588" text-anchor="middle">100</text>
+<text class="axis-label" x="828.0" y="588" text-anchor="middle">150</text>
+<text x="500.0" y="632" text-anchor="middle">Charge : utilisateurs simultanés</text>
+<text x="22" y="325.0" transform="rotate(-90 22 325.0)" text-anchor="middle">Débit (req/s)</text>
+<text x="978" y="325.0" transform="rotate(90 978 325.0)" text-anchor="middle">p95 (ms)</text>
+<rect x="110" y="48" width="18" height="12" class="bar"/>
+<text class="legend" x="136" y="59">Débit (req/s)</text>
+<line class="latency" x1="275" y1="54" x2="300" y2="54"/>
+<circle class="point" cx="287.5" cy="54" r="4"/>
+<text class="legend" x="308" y="59">p95 (ms)</text>
+</svg>

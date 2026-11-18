@@ -1,0 +1,15 @@
+﻿Campagne TP5 - configuration 2 workers / 2 coeurs
+Date : 17 novembre 2026
+Base Compose : docker-compose.yml
+Override : compose.workers.yaml
+Commande API : uvicorn velov.api.main:app --host 0.0.0.0 --port 8000 --workers 2
+Limite CPU appliquee : 2 coeurs avec docker update --cpus 2
+Scenario : loadtest\\paliers.ps1, inchangé
+URL : http://localhost:8000
+Resultats Locust bruts : evidence/tp5-saturation-w2/
+Statistiques Docker brutes : evidence/tp5-api-stats-w2.txt
+SLO : p95 < 200 ms et taux d'erreur < 0,1 %
+Capacite sous le SLO : 30,25 req/s au palier de 25 utilisateurs
+Premier depassement : 50 utilisateurs, p95 de 810 ms
+CPU API observe : jusqu'a 204,87 %
+Memoire API observee : 285,5 a 316,6 MiB
