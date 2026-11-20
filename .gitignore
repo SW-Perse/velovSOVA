@@ -25,3 +25,9 @@ locust-results/
 
 # Fichier d'instructions pour Copilot
 copilot-instructions.md
+
+# Certificats SSL/TLS
+certs/
+
+# Fichier de configuration Docker Compose local
+compose.local.yaml
