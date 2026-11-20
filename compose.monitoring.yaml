@@ -17,7 +17,7 @@ services:
 
   db:
     # Joignable depuis la VM seulement (127.0.0.1), pour velov.monitor ; jamais depuis le réseau.
-    ports:
+    ports: !override 
       - "127.0.0.1:5432:5432"
 
   proxy:

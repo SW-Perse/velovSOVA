@@ -15,6 +15,9 @@ mlruns/
 # Secrets
 .env
 
+# Certificats et clés
+certs/
+
 velov_dbt/target/
 velov_dbt/logs/
 

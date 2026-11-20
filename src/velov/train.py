@@ -98,6 +98,15 @@ def load_gold_training_data(database_path: Path) -> pd.DataFrame:
     return validate_station_hourly(gold)
 
 
+def load_table(path: Path) -> pd.DataFrame:
+    """Lit les observations horaires : CSV (simulateur ou historique reconstruit) ou table gold DuckDB."""
+    if not path.exists():
+        raise FileNotFoundError(f"{path} introuvable")
+    if path.suffix == ".duckdb":
+        return load_gold_training_data(path)  # déjà validé par le contrat
+    return pd.read_csv(path, parse_dates=["timestamp"])
+
+
 def train(
     data_path: Path,
     out_dir: Path,

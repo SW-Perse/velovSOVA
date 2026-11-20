@@ -7,6 +7,9 @@ src/velov/contracts.py
 src/velov/data.py
 src/velov/features.py
 src/velov/ingest.py
+src/velov/promote.py
+src/velov/registry.py
+src/velov/replay.py
 src/velov/run_microbatch.py
 src/velov/train.py
 src/velov.egg-info/PKG-INFO
@@ -20,3 +23,7 @@ tests/test_api.py
 tests/test_contract.py
 tests/test_features.py
 tests/test_ingestion.py
+tests/test_loadtest_summary.py
+tests/test_mlflow_stack.py
+tests/test_promotion.py
+tests/test_training_metadata.py
