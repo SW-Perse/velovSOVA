@@ -31,10 +31,14 @@ from velov.api.schemas import PredictionRequest, PredictionResponse  # noqa: F40
 from velov.artifacts import METADATA_FILENAME, sha256_of
 from velov.features import FEATURES, add_features  # noqa: F401
 
+from prometheus_client import Gauge
+from prometheus_fastapi_instrumentator import Instrumentator
+
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
 logger = logging.getLogger("velov.api")
 
 STATE: dict = {"model": None, "metadata": None}
+MODEL_INFO = Gauge("velov_model_info", "Modèle servi", ["model_version"])
 
 def save_prediction(
     station_id: int,
@@ -86,6 +90,10 @@ async def lifespan(app: FastAPI):
     model_dir = Path(os.getenv("MODEL_DIR", "models"))
     try:
         STATE["model"], STATE["metadata"] = load_model(model_dir)
+        MODEL_INFO.clear()
+        MODEL_INFO.labels(
+            model_version=STATE["metadata"]["model_version"]
+        ).set(1)
         logger.info("Modèle %s chargé", STATE["metadata"]["model_version"])
     except Exception:
         logger.exception("Échec du chargement du modèle depuis %s", model_dir)
@@ -95,6 +103,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Vélo'v availability API", version="1.0.0", lifespan=lifespan)
 
+Instrumentator(
+    excluded_handlers=["/metrics"],
+).instrument(
+    app,
+    latency_lowr_buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1),
+).expose(app, include_in_schema=False)
 
 # TODO 5 [Should] : GET /health -> {"status": "ok"}
 @app.get("/health")
